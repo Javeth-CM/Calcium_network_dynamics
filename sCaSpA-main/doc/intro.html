@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>sCaSpA - Quick Start</title>
+</head>
+<a name="top"></a>
+<body>
+
+	<h1>Quick start</h1>
+    <a name="app"></a>
+    <h2>Starting the application</h2>
+    <p>
+    The goal of this program is analysing spontaneous calcium spikes in neuronal cultures. Starting the aplication can be done by running the <b>sCaSpA.m</b> file.
+	Please make sure that the main application folder is added to the MATLAB path, as well as the dependencies folder.
+    </p>
+	
+	<h2>Import the data</h2>
+	<p>
+	The data should be organized into one folder containing an equal number of files for the still images (used to manually identify the region of interest) and timelapse recordings.
+	For the program it is important that the files are named in a specific way. Currently there are two accepted filename:
+	<ul>
+		<li>For the still: yymmdd_StillCondition_WellID_fovID. For the timelapse: yymmdd_Condition_WellID_fovID.
+		<br>For example, the two files would like 220515_DIC_WellA01_001 and 220515_MyExperiment_WellA01_001.</li>
+		<br><br>
+		<li>For the still: yymmdd_Condition_Still_WellID_fovID. For the timelapse: yymmdd_Condition_WellID_fovID.
+		<br>For example, the two files would like 220515_MyExperiment_DIC_WellA01_001 and 220515_MyExperiment_WellA01_001.</li>
+	</ul>
+	For both cases it is essential to have 3-4 underscores for the still condition and 3 for the timelapse. This is because the program will automatically link the two sets of images
+	based on the <i>date</i> and the <i>WellID</i>. Both <b>nd2</b> and <b>tif</b> files can be open, but only one file type at the time is supported.
+	
+	<br><br>Once the data is succefully loaded into the interface, the still image and the first frame of the timelapse will appear on the left and right side of the interface.
+	Additionally, several interaction buttons will become availabe.
+	</p>
+	
+	<h3>Image navigation</h3>
+	<p>
+	At this point it is possible to inspect the different FOV without loading the timelapses. If the still condition is a multichannel image, the different channels will be shown
+	separately and they are accessibly via the three buttons located below the image.
+	</p>
+	
+	<h2>ROIs Manipulation</h2>
+	<h3>Adding ROIs</h3>
+	<p>
+	Region of interests (ROIs) can be added manually by selecting the <i>"Add ROIs"</i> button locate at the top of the interface. The cursor will show a small crosshair and the ROIs
+	can be added by clicking on either of the two images.
+	<br>Note that even though it is possible to move between different channels while adding ROIs, <b>it is not recommended</b> due to unpredictable behavior of the interface.
+	<br>
+	<br>It is possible to automatically detect the ROIs in one or all the FOV by selecting the <i>"Detect ROIs"</i>. The program will then perform a series of thresholds to identify object based
+	on the first frame of the timelapse until it reaches the approximate number of ROIs as specified by the <i>"ROIs #"</i> in the ROIs Options on the right side of the interface.
+	<br>Note that this functionality is still under development and it is meant as a quick tool to start screening the data, not yet as a final ROI detection.
+	<br>
+	<br>Alternatively, ROIs can be imported from other platform via the <i>"Import ROIs"</i> button. The program will then ask to select a csv file containing the center
+</body>
+</html>
