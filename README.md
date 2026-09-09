@@ -78,6 +78,8 @@ This tells MATLAB to look inside this folder (and all its subfolders) whenever i
 
 ## 5. About the example data
 
+**THE DATA CAN BE DOWNLOADED HERE: **https://drive.google.com/drive/folders/14Bh17yhraN6YkT2-Q2wruPix_C3kkkQF?usp=sharing
+
 This repository includes a folder called **`Ca_data_test_1`** that contains example calcium imaging data ready to use. You do not need to open or modify any files inside this folder manually — when you launch sCaSpA and click **Open data**, you will point it to this folder and the software will load everything automatically.
 
 The example data was recorded from a primary cortical neuronal culture loaded with the calcium-sensitive dye Fluo-4, imaged with a widefield epifluorescence microscope at **8 frames per second** (8 Hz).
@@ -309,6 +311,161 @@ If you accidentally place an ROI in the wrong location:
 2. Click on the incorrectly placed ROI circle (on either panel) to remove it.
 3. Click **Delete ROIs** again to deactivate deletion mode.
 
+---
+
+## 12. Spike Detection
+
+After placing your ROIs, the next step is to detect the calcium transient peaks (spikes) in each fluorescence trace. This is done using the **Spike Detection** panel.
+
+### 12.1. Selecting which data to detect spikes on
+
+Before clicking **Detect**, you need to decide which traces to run detection on:
+
+| Button | What it does | When to use it |
+|---|---|---|
+| **All FOVs** | Runs spike detection on every field of view (every recording) loaded in the current session. | Use this when you have loaded multiple movies and want to process all of them in one step. |
+| **Selected FOV** | Runs spike detection only on the recording currently selected in the `Timelapse_ID` dropdown. | Use this when you have multiple recordings but only want to test or process one at a time. |
+| **Current List** | Runs detection on the subset of FOVs belonging to the currently selected experiment. | Useful for batch processing specific experimental groups after filtering your data. |
+| **Selected Trace** | Runs detection only on the single ROI (cell) currently highlighted in the Ca²⁺ Trace plot. | Use this to re-run detection with different threshold settings on a specific problem cell, without overwriting the results for all other cells. |
+
+For this example, with only one recording loaded, click **All FOVs** to be explicit, then click **Detect**.
+
+### 12.2. How detection works and the critical settings
+
+The algorithm identifies spikes by measuring how far a peak rises above the resting noise level. The behavior of this algorithm is heavily controlled by the **Detection Options** panel. 
+
+**Key Method Options:**
+*   **MAD (Mean Absolute Deviation):** Computes the median baseline of the trace and sets the threshold by adding the absolute deviation multiplied by your **Threshold** value. Best for clean, stable baselines.
+*   **Normalized MAD:** A statistically robust version of MAD scaled to approximate the standard deviation (using a specific inverse error function modifier). Best for datasets with frequent, densely packed spikes where traditional standard deviation is artificially inflated.
+*   **Rolling St. Dev.:** Uses a sliding window (sized based on your Max Duration + Min Distance settings) to calculate a local moving mean and standard deviation. Best for recordings with significant baseline drift or photobleaching that detrending did not fully remove.
+
+**Running the steps:**
+*   **Detect** identifies the location (time point) and amplitude of each calcium transient peak based on your Threshold and Duration settings. It marks detected events as vertical light-blue stripes in the Ca²⁺ Trace plot.
+*   **Quantify** must always be run *after* Detect. It uses the peak locations to compute complex kinetics (rise/decay times) and network synchrony. 
+
+### 12.3. Manually correcting detections: Add Peak and Remove Peak
+
+If the algorithm misses a spike or flags a noise artifact, you can manually correct it in **Single Trace** mode:
+
+*   **Add Peak:** Click the button, then left-click on the missed peak in the trace plot. The code searches a small local window around your click to snap exactly to the true local maximum. *Tip: Right-clicking while in this mode will undo the last manually added peak.*
+*   **Remove Peak:** Click the button, then left-click near a falsely detected peak to delete it. The peak marker will turn into a red 'x' to indicate deletion. *Tip: Right-clicking in this mode undoes the last deletion.*
+
+*Always click **Quantify** again after making manual edits to update the statistics.*
+
+---
+
+## 13. Quantification
+
+Click **Quantify** (with **All FOVs** selected) after running Detect. This step builds the comprehensive statistics table.
+
+### 13.1. How Quantify computes spike kinetics
+
+For each detected spike, the algorithm does the following:
+1.  **Onset Detection (Rise):** Walks backward from the peak until it finds the deepest valley before the previous spike.
+2.  **Offset Detection (Decay):** Walks forward from the peak until it finds a valley that returns closest to the baseline intensity.
+3.  **Spike Widths:** Calculates the duration of the spike at exactly 25%, 50%, 75%, and 90% of the peak's prominence (height above baseline).
+4.  **Exponential Fit:** Uses the Curve Fitting Toolbox to fit a non-linear exponential curve (`exp1`) to the decay phase, extracting a highly accurate decay time constant (τ).
+
+### 13.2. How Quantify computes network synchrony
+
+Across all cells, the software calculates network bursting behavior:
+*   **Network Raster Generation:** The code converts individual cell spikes into blocks of active time based on your chosen spike width (see `Network level` below). 
+*   **Network Frequency:** It sums these active blocks across all cells, applies a Gaussian smoothing window, and detects "Network Peaks". A network peak is only counted if the number of participating cells exceeds the threshold defined by your **Network %** setting.
+
+### 13.3. Options that activate after Quantify
+
+After Quantify completes, new visualization toggles unlock in the bottom-right panel:
+*   **Show Peaks:** Overlays red circles directly on the detected peaks in the trace plot.
+*   **Show Rise/Decay (Single Trace only):** Colors the computed rising phase of the spike in **pink** and the decaying phase in **green**. This allows you to visually verify the onset/offset valleys calculated in step 13.1.
+*   **Show as Raster:** Replaces the Y-axis fluorescence scale with cell IDs, displaying a timeline of dots representing firing events.
+
+---
+
+## 14. Understanding the Ca²⁺ Trace plot
+
+The bottom panel displays the **Ca²⁺ Trace** plot, providing visual feedback of the signal and detections.
+
+### 14.1. Axes
+*   **X-axis (Time in seconds):** The full recording duration. Calculated automatically using your total frame count divided by the **Frequency** (Hz) setting.
+*   **Y-axis (ΔF/F₀):** The normalized fluorescence change. A value of 0.3 means the cell is 30% brighter than its resting baseline level.
+
+### 14.2. Visual Elements in "All And Mean" Mode
+*   **Gray lines ("All"):** Individual ΔF/F₀ traces for every loaded ROI. 
+*   **Red line ("Mean"):** The average of all active traces at every time point. Sharp upward deflections here strongly indicate synchronized network bursts.
+*   **Light blue vertical stripes:** Mark the detection window (±0.1 seconds) around a spike peak. Because these patches are drawn with 10% opacity, they stack on top of each other. Denser, darker blue vertical bands instantly highlight moments of high network synchrony where many cells fired simultaneously.
+
+### 14.3. Visual Elements in "Single Trace" Mode
+When you switch to **Single Trace** and toggle **Show Rise/Decay**, the plot isolates one cell:
+*   **Black line:** The specific cell's ΔF/F₀ trace.
+*   **Blue dotted horizontal line:** The dynamic detection threshold calculated for this specific cell (e.g., the MAD threshold line).
+*   **Red circles:** The peak maxima.
+*   **Pink/Green segments:** The exact boundaries of the rising (pink) and decaying (green) phases measured by the quantification algorithm.
+
+---
+
+## 15. Plot Interaction panel
+
+This panel controls the Trace Plot navigation.
+
+| Control | What it does | Interaction Details |
+|---|---|---|
+| **Plot Type** | Toggles between **All And Mean** and **Single Trace** views. | Changing to Single Trace enables the `Cell Number`, `Add/Remove Peak`, and `Show Rise/Decay` controls. |
+| **Zoom X** | Sets the start and end of the visible X-axis time window. | Type the exact start and end seconds in the two numeric boxes. |
+| **Fix Y Axis** | Locks the Y-axis limits. | Prevents the plot from auto-scaling when you switch between cells with vastly different fluorescent amplitudes. |
+| **Cell Number** | Steps through individual ROIs (`-` and `+`). | Only active in Single Trace mode. Adjusts the highlighted cell and trace. |
+| **Show active** | Highlights the current ROI in the image panels above. | Helps you physically locate which cell in the culture corresponds to the trace you are inspecting. |
+
+---
+
+## 16. Other settings and interactions
+
+This panel contains advanced thresholds that deeply impact how network synchrony is defined during quantification. 
+
+### 16.1. Network & Synchronicity Thresholds
+These settings determine how the software decides if two spikes from different cells "overlap" in time to form a network burst.
+
+*   **Network level / Synch level:** These dropdowns (`Baseline`, `25%`, `50%`, `75%`, `90%`) control the "width" of a spike for overlap calculations. 
+    *   *How it works:* If set to `50%`, the algorithm uses the spike's Full Width at Half Maximum (FWHM) as its active window. Two cells are only considered firing "synchronously" if their 50% width windows overlap. A stricter setting (e.g., `90%` near the peak) requires spikes to happen at almost the exact same millisecond.
+*   **Network %:** Defines the minimum percentage of active cells required to declare a network burst. If set to `80`, then 80% of all firing cells must have overlapping spike windows (defined by the Network level) for the software to count it as a `NetworkFrequency` event.
+
+### 16.2. Additional Toggles
+*   **Label ROIs:** Allows you to click on ROIs to assign them to a sub-group. Doing this before Quantify calculates all metrics separately for the labeled (`...Positive`) vs unlabeled (`...Negative`) populations.
+*   **Keep FOV / Keep Trace:** Green toggles that dictate whether a whole recording (FOV) or an individual cell (Trace) is included in the final data export. Click to reject noisy data.
+*   **Load each FOV & Batch load movie:** Used for processing highly multiplexed experiments automatically.
+
+---
+
+## 17. Exporting the data
+
+Click **Save** in the top panel to export your results, then choose **Analysis**. 
+
+### 17.1. What NOT to select (Preventing CSV Crashes)
+The underlying export function relies on MATLAB's `writetable`, which requires flat, 2D data. If you select variables containing raw matrices or arrays of variable lengths, MATLAB will forcefully flatten thousands of data points into a single row, breaking the CSV.
+
+**Do not select these arrays:** `ImgByteStrip`, `RawIntensity`, `FF0Intensity`, `DetrendData`, `KeepROI`, `SpikeLocations`, `SpikeIntensities`, `SpikeWidths`, `SpikeProperties`, `SpikeRaster`, `FWHMRaster`, `NetworkRaster`, `SpikeInOut`, `CellFrequency`.
+
+### 17.2. Safe Metadata Columns
+Select these single-value identifiers to track your experiments:
+`Filename`, `CellID`, `Week`, `CoverslipID`, `RecID`, `Condition`, `ExperimentID`, `KeepFOV`, `Fs`.
+
+### 17.3. Core Calcium Metrics
+Select these scalar values for your downstream statistical analysis. For every cell-level metric below, the software exports the **Mean, Median, Variance, Skewness, Kurtosis, CoV** (Coefficient of Variation), and **QCD** (Quantile Coefficient of Dispersion—a robust alternative to CoV that uses quartiles) across the whole network.
+
+| Metric | Biological Interpretation |
+|---|---|
+| **NetworkFrequency** | The number of synchronized population bursts per minute. Plummets under pharmacological silencing (e.g., TTX). |
+| **SilentCells** | The percentage of ROIs that did not fire a single spike. |
+| **...Frequency** | Spikes per minute averaged across all active cells. |
+| **...InterSpikeInterval** | Time between consecutive spikes. Short intervals with high variance indicate bursting behavior. |
+| **...Synchronicity** | The average percentage of the network participating in a sync event. |
+| **...Isolated** | The percentage of spikes that occurred independently, outside of network bursts. |
+| **...TimeToRise / DecayTau** | Rise time and exponential decay tau characterize the calcium influx and dye unbinding kinetics. |
+| **...Duration50** | The Full Width at Half Maximum (FWHM) of the spikes. Wider spikes indicate prolonged calcium clearance. |
+| **...Prominence** | The peak amplitude above the local baseline noise, representing the strength of the calcium transient. |
+
+*Note: If you utilized the "Label ROIs" tool, all of these statistics are additionally exported as `...Positive` and `...Negative` columns for direct sub-population comparisons.*
+
+---
 ### Measuring soma size
 
 To determine the correct ROI Size for your own data, you can measure the diameter of a neuron's cell body in pixels:
