@@ -87,7 +87,7 @@ Full assumption-test outputs (Shapiro-W, Levene-W and their p-values), raw post-
 
 **Figure 1. Overview of all 12 network-dynamics metrics, by condition.** Raincloud plots (individual FOVs, box, and kernel density) for Control, TTX, and Blocker. See [Figure 2](#fig2)–[Figure 13](#fig13) below for each metric at full size with its own statistics.
 
-![Figure 1. Overview of all 12 metrics across Control, TTX, and Blocker](figures/overview_all_metrics.png)
+<p align="center"><img src="figures/overview_all_metrics.png" width="700" alt="Figure 1. Overview of all 12 metrics across Control, TTX, and Blocker"></p>
 
 ### 3.2 Metric-by-metric
 
@@ -101,7 +101,7 @@ Chronic TTX pre-treatment nearly halved the proportion of isolated spikes compar
 
 **Figure 2. Isolated spikes (MeanIsolated, %) by condition.** Control 86.8 ± 9.8%, TTX 37.2 ± 17.8%, Blocker 53.1 ± 12.5%. One-way ANOVA, F(2,13) = 14.50, p < .001, η² = 0.69 — the only metric to survive FDR correction across all 12 (q = .006). Tukey HSD: Control vs TTX p = .0003; Control vs Blocker p = .012; TTX vs Blocker p = .19.
 
-![Figure 2. MeanIsolated raincloud plot](figures/MeanIsolated.png)
+<p align="center"><img src="figures/MeanIsolated.png" width="500" alt="Figure 2. MeanIsolated raincloud plot"></p>
 
 #### Calcium transient prominence (ΔF/F₀)
 
@@ -111,7 +111,7 @@ Control transients were small and tightly clustered (0.32 ± 0.06), TTX transien
 
 **Figure 3. Calcium transient prominence (ΔF/F₀) by condition.** Control 0.32 ± 0.06, TTX 0.70 ± 0.34, Blocker 1.02 ± 0.44. One-way ANOVA, F(2,13) = 4.91, p = .026, η² = 0.43, q = .064. Tukey HSD: Control vs Blocker p = .020; Control vs TTX p = .20.
 
-![Figure 3. MeanProminence raincloud plot](figures/MeanProminence.png)
+<p align="center"><img src="figures/MeanProminence.png" width="500" alt="Figure 3. MeanProminence raincloud plot"></p>
 
 #### Transient duration (at 25 %, 50 %, 75 % and 90 % of peak)
 
