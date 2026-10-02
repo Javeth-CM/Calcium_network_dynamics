@@ -6,9 +6,7 @@ The recordings analyzed here come from cultures loaded with Fluo-4 and imaged un
 
 
 <p align="center">
-  <video src="media/ttx_network.mp4" controls width="620" muted loop playsinline>
-    Your browser can't play this video inline. <a href="media/ttx_network.mp4">Download it here</a>.
-  </video>
+  <img src="media/ttx_network.gif" alt="Spontaneous network activity in a TTX-pretreated cortical culture, post-washout" width="620">
 </p>
 <p align="center"><sub><em>Spontaneous network activity in a TTX-pretreated cortical culture, post-washout. Fluo-4, 8 Hz, widefield epifluorescence.</em></sub></p>
 
