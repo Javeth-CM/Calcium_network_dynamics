@@ -6,7 +6,7 @@ The recordings analyzed here come from cultures loaded with Fluo-4 and imaged un
 
 
 <p align="center">
-  <img src="media/ttx_network.gif" alt="Spontaneous network activity in a TTX-pretreated cortical culture, post-washout" width="620">
+  <img src="media/ttx_network.gif" alt="Spontaneous network activity in a TTX-pretreated cortical culture, post-washout" width="480">
 </p>
 <p align="center"><sub><em>Spontaneous network activity in a TTX-pretreated cortical culture, post-washout. Fluo-4, 8 Hz, widefield epifluorescence.</em></sub></p>
 
@@ -226,4 +226,4 @@ sCaSpA (v1.3#3) is actively developed and a few GUI features are not yet fully i
 
 ## Results
 
-For some proof of concept experimental results please access the document: `report.md`
+For some proof of concept experimental results please access the document: [report.md](report.md)
